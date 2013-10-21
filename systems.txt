@@ -1,0 +1,16 @@
+gameboy color: 160 x 144
+DS: 256 × 192
+advance:  240 × 160
+psp: 480 × 272 
+
+http://circuitco.com/support/index.php?title=BeagleBone_LCD7 : 800x480, touch
+
+http://circuitco.com/support/index.php?title=BeagleBone_LCD3 : 320x240, touch
+
+http://circuitco.com/support/index.php?title=BeagleBone_LCD4 : 480x272, touch
+
+http://circuitco.com/support/index.php?title=4D_4.3_LCD_CAPE : 480x272, touch available
+
+http://www.adafruit.com/products/1348#Description look into-controller
+
+http://www.youtube.com/watch?v=ZnBvK8-LVuw
