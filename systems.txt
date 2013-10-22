@@ -1,7 +1,9 @@
 gameboy color: 160 x 144
-DS: 256 × 192
+DS: 256 × 192 (Could require 2 screens which would be expensive).
 advance:  240 × 160
-psp: 480 × 272 
+psp: 480 × 272 (Don't know any emulators for this).
+gamecube: 640x480 (Limits us to the first screen, or a hdmi out to tv).
+playstation 1: 640x480(Limits us to the first screen, or a hdmi out to tv. Additionally it is not clear if the is a emulator for this at the moment).
 
 http://circuitco.com/support/index.php?title=BeagleBone_LCD7 : 800x480, touch
 
@@ -17,3 +19,14 @@ http://www.youtube.com/watch?v=ZnBvK8-LVuw
 
 People set it up so it would act as a snes:
 http://beaglesnes.sourceforge.net/
+
+
+
+
+Notes:
+The best plan would probably support the gameboy advanced, as that also gives you gameboy color capabilities. Alternatively if we go to none portable systems both the gamecube and playstation 1 would be good routes to follow.
+
+Equipment:
+	-Screens: First choice: http://circuitco.com/support/index.php?title=BeagleBone_LCD7
+			  Second choice: any other screen
+	-Controller: Xbox controller will be provided by David
