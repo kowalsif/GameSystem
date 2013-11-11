@@ -1,0 +1,219 @@
+////gcc gpio-utils.h gpio-utils.c ledcont.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <signal.h>	// Defines signal-handling functions (i.e. trap Ctrl-C)
+#include "gpio-utils.h"
+
+#define POLL_TIMEOUT (3 * 1000) /* 3 seconds */
+#define MAX_BUF 64
+
+int keepgoing = 1;	// Set to 0 when ctrl-c is pressed
+
+void signal_handler(int sig);
+// Callback called when SIGINT is sent to the process (Ctrl-C)
+void signal_handler(int sig)
+{
+	printf( "Ctrl-C pressed, cleaning up and exiting..\n" );
+	keepgoing = 0;
+}
+
+int main(int argc, char **argv, char **envp)
+{
+	struct pollfd fdset[10];
+	int nfds = 10;
+	int gpio_fdbut0, gpio_fdbut1, gpio_fdbut2, gpio_fdbut3, gpio_fdbut4, gpio_fdbut5, gpio_fdbut6, gpio_fdbut7, gpio_fdbut8, gpio_fdbut9, timeout, rc;
+	char buf[MAX_BUF];
+	unsigned int gpio;
+	unsigned int but0 = 50; //0->1 p14
+	unsigned int but1 = 60; //1->0 p12
+	unsigned int but2 = 3; //1->0 p3
+	unsigned int but3 = 2; //0->1 p2
+	unsigned int but4 = 30; //1->0 p10
+	unsigned int but5 = 31; //1->0 p12
+	unsigned int but6 = 48; //1->0 p15
+	unsigned int but7 = 49; //0->1 p23
+	unsigned int but8 = 83; //0->1 p27
+	unsigned int but9 = 14; //1->0 p26
+	int len;
+	int state[10];
+	state[0] = 0;
+	state[1] = 0;
+	state[2] = 0;
+	state[3] = 0;
+	state[4] = 0;
+	state[5] = 0;
+	state[6] = 0;
+	state[7] = 0;
+	state[8] = 0;
+	state[9] = 0;
+	// Set the signal callback for Ctrl-C
+	signal(SIGINT, signal_handler);
+	
+
+	gpio_export(but0);
+	gpio_export(but1);
+	gpio_export(but2);
+	gpio_export(but3);
+	gpio_export(but4);
+	gpio_export(but5);
+	gpio_export(but6);
+	gpio_export(but7);
+	gpio_export(but8);
+	gpio_export(but9);
+	
+	gpio_set_dir(but0, "in");
+	gpio_set_dir(but1, "in");
+	gpio_set_dir(but2, "in");
+	gpio_set_dir(but3, "in");
+	gpio_set_dir(but4, "in");
+	gpio_set_dir(but5, "in");
+	gpio_set_dir(but6, "in");
+	gpio_set_dir(but7, "in");
+	gpio_set_dir(but8, "in");
+	gpio_set_dir(but9, "in");
+	gpio_set_edge(but0, "both");// Can be rising, falling or both
+	gpio_set_edge(but1, "both");
+	gpio_set_edge(but2, "both");
+	gpio_set_edge(but3, "both");
+	gpio_set_edge(but4, "both");
+	gpio_set_edge(but5, "both");
+	gpio_set_edge(but6, "both");
+	gpio_set_edge(but7, "both");
+	gpio_set_edge(but8, "both");
+	gpio_set_edge(but9, "both");
+	
+	gpio_fdbut0 = gpio_fd_open(but0, O_RDONLY);
+	gpio_fdbut1 = gpio_fd_open(but1, O_RDONLY);
+	gpio_fdbut2 = gpio_fd_open(but2, O_RDONLY);
+	gpio_fdbut3 = gpio_fd_open(but3, O_RDONLY);
+	gpio_fdbut4 = gpio_fd_open(but4, O_RDONLY);
+	gpio_fdbut5 = gpio_fd_open(but5, O_RDONLY);
+	gpio_fdbut6 = gpio_fd_open(but6, O_RDONLY);
+	gpio_fdbut7 = gpio_fd_open(but7, O_RDONLY);
+	gpio_fdbut8 = gpio_fd_open(but8, O_RDONLY);
+	gpio_fdbut9 = gpio_fd_open(but9, O_RDONLY);
+	
+
+	timeout = POLL_TIMEOUT;
+ 
+	while (keepgoing) {
+		memset((void*)fdset, 0, sizeof(fdset));
+      
+		fdset[0].fd = gpio_fdbut0;
+		fdset[0].events = POLLPRI;
+		
+		fdset[1].fd = gpio_fdbut1;
+		fdset[1].events = POLLPRI;
+		
+		fdset[2].fd = gpio_fdbut2;
+		fdset[2].events = POLLPRI;
+		
+		fdset[3].fd = gpio_fdbut3;
+		fdset[3].events = POLLPRI;
+		
+		fdset[4].fd = gpio_fdbut4;
+		fdset[4].events = POLLPRI;
+		
+		fdset[5].fd = gpio_fdbut5;
+		fdset[5].events = POLLPRI;
+		
+		fdset[6].fd = gpio_fdbut6;
+		fdset[6].events = POLLPRI;
+		
+		fdset[7].fd = gpio_fdbut7;
+		fdset[7].events = POLLPRI;
+	
+		fdset[8].fd = gpio_fdbut8;
+		fdset[8].events = POLLPRI;
+		
+		fdset[9].fd = gpio_fdbut9;
+		fdset[9].events = POLLPRI;
+
+		rc = poll(fdset, nfds, timeout);      
+
+		if (rc < 0) {
+			printf("\npoll() failed!\n");
+			return -1;
+		}
+      
+		if (rc == 0) {
+			printf(".");
+		}
+        
+        if (fdset[0].revents & POLLPRI) {
+			lseek(fdset[0].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[0].fd, buf, MAX_BUF);
+			system("xdotool key z");
+
+		}    
+		if (fdset[1].revents & POLLPRI) {
+			lseek(fdset[1].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[1].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[2].revents & POLLPRI) {
+			lseek(fdset[2].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[2].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[3].revents & POLLPRI) {
+			lseek(fdset[3].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[3].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[4].revents & POLLPRI) {
+			lseek(fdset[4].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[4].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[5].revents & POLLPRI) {
+			lseek(fdset[5].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[5].fd, buf, MAX_BUF);
+			system("xdotool key z");
+
+		}    
+		if (fdset[6].revents & POLLPRI) {
+			lseek(fdset[6].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[6].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[7].revents & POLLPRI) {
+			lseek(fdset[7].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[7].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[8].revents & POLLPRI) {
+			lseek(fdset[8].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[8].fd, buf, MAX_BUF);
+
+		}
+		if (fdset[9].revents & POLLPRI) {
+			lseek(fdset[9].fd, 0, SEEK_SET);// Read from the start of the file
+			len = read(fdset[9].fd, buf, MAX_BUF);
+
+		}
+
+
+		fflush(stdout);
+	}
+
+	gpio_fd_close(gpio_fdbut0);
+	gpio_fd_close(gpio_fdbut1);
+	gpio_fd_close(gpio_fdbut2);
+	gpio_fd_close(gpio_fdbut3);
+	gpio_fd_close(gpio_fdbut4);
+	gpio_fd_close(gpio_fdbut5);
+	gpio_fd_close(gpio_fdbut6);
+	gpio_fd_close(gpio_fdbut7);
+	gpio_fd_close(gpio_fdbut8);
+	gpio_fd_close(gpio_fdbut9);
+	
+	return 0;
+}
+
