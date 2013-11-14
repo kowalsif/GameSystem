@@ -10,7 +10,7 @@
 #include <signal.h>	// Defines signal-handling functions (i.e. trap Ctrl-C)
 #include "gpio-utils.h"
 
-#define POLL_TIMEOUT (3 * 1000) /* 3 seconds */
+#define POLL_TIMEOUT (1 * 50) /* 3 seconds */
 #define MAX_BUF 64
 
 int keepgoing = 1;	// Set to 0 when ctrl-c is pressed
@@ -21,6 +21,24 @@ void signal_handler(int sig)
 {
 	printf( "Ctrl-C pressed, cleaning up and exiting..\n" );
 	keepgoing = 0;
+}
+
+int analogRead(char *analog){ 
+	char analogpath[64], val[64];
+	char buffer[1024];
+	int fd, value;
+	FILE *fp;
+	
+	snprintf(analogpath, sizeof analogpath, "/sys/devices/ocp.2/helper.14/%s", analog);
+	
+	if((fp = fopen(analogpath, "r")) == NULL){
+		printf("Can't open this pin, %s\n", analog);
+		return 1;
+	}
+	fgets(val, MAX_BUF, fp);
+
+	fclose(fp);
+	return atoi(val);	
 }
 
 int main(int argc, char **argv, char **envp)
@@ -47,6 +65,18 @@ int main(int argc, char **argv, char **envp)
 	state[2] = 1;
 	state[3] = 1;
 
+	char ain0[] = "AIN0";
+	char ain1[] = "AIN1";
+	int ainR[2];
+	int deadband = 200; //deadband control
+	
+	
+	//output an analog pin, to enable reading
+	printf("test\n");
+	system("SLOTS=/sys/devices/bone_capemgr.*/slots");
+	system("PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins");
+	system("echo cape-bone-iio > SLOTS");
+
 	// Set the signal callback for Ctrl-C
 	signal(SIGINT, signal_handler);
 	
@@ -72,10 +102,10 @@ int main(int argc, char **argv, char **envp)
 	gpio_set_dir(but7, "in");
 	gpio_set_dir(but8, "in");
 	gpio_set_dir(but9, "in");
-	gpio_set_edge(but0, "both");// Can be rising, falling or both
-	gpio_set_edge(but1, "both");
-	gpio_set_edge(but2, "both");
-	gpio_set_edge(but3, "both");
+	gpio_set_edge(but0, "falling");// Can be rising, falling or both
+	gpio_set_edge(but1, "falling");
+	gpio_set_edge(but2, "falling");
+	gpio_set_edge(but3, "falling");
 	gpio_set_edge(but4, "rising");
 	gpio_set_edge(but5, "rising");
 	gpio_set_edge(but6, "rising");
@@ -145,25 +175,33 @@ int main(int argc, char **argv, char **envp)
         if (fdset[0].revents & POLLPRI) {
 			lseek(fdset[0].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[0].fd, buf, MAX_BUF);
-			state[0] = !state[0];
+			system("xdotool key a");
+			system("xdotool key Return");
+			//state[0] = !state[0];
 
 		}    
 		if (fdset[1].revents & POLLPRI) {
 			lseek(fdset[1].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[1].fd, buf, MAX_BUF);
-			state[1] = !state[1];
+			system("xdotool key d");
+			system("xdotool key Return");
+			//state[1] = !state[1];
 
 		}
 		if (fdset[2].revents & POLLPRI) {
 			lseek(fdset[2].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[2].fd, buf, MAX_BUF);
-			state[2] = !state[2];
+			system("xdotool key w");
+			system("xdotool key Return");
+			//state[2] = !state[2];
 		}
 		if (fdset[3].revents & POLLPRI) {
 			lseek(fdset[3].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[3].fd, buf, MAX_BUF);
 			//system("xdotool key Down");
-			state[3] = !state[3];
+			system("xdotool key s");
+			system("xdotool key Return");
+			//state[3] = !state[3];
 
 		}
 		if (fdset[4].revents & POLLPRI) {
@@ -203,6 +241,7 @@ int main(int argc, char **argv, char **envp)
 
 		}
 		
+		/*
 		if (state[0] == 1){
 			system("xdotool key Left");
 		}
@@ -215,10 +254,41 @@ int main(int argc, char **argv, char **envp)
 		if (state[3] == 1){
 			system("xdotool key Down");
 		}
+		*/
 
-
-		fflush(stdout);
-		//usleep(1); //0.1ms
+		ainR[0] = analogRead(ain0);
+		ainR[1] = analogRead(ain1);
+		ainR[0] = analogRead(ain0);
+		ainR[1] = analogRead(ain1);
+		ainR[0] = analogRead(ain0);
+		ainR[1] = analogRead(ain1);
+		ainR[0] = analogRead(ain0);
+		ainR[1] = analogRead(ain1);
+		
+		ainR[0] = analogRead(ain0);
+		ainR[1] = analogRead(ain1);
+		//printf("value %d %d\n", ainR[0], ainR[1]);
+		if (ainR[0] - deadband > 880){
+			system("xdotool key s");
+			system("xdotool key Return");
+		}
+		if (ainR[0] + deadband < 880){
+			system("xdotool key w");
+			system("xdotool key Return");
+		}
+		
+		if (ainR[1] - deadband > 880){
+			system("xdotool key d");
+			system("xdotool key Return");
+		}
+		if (ainR[1] + deadband < 880){
+			system("xdotool key a");
+			system("xdotool key Return");
+			//printf("Mission succesfull");
+		}
+		
+		//fflush(stdout);
+		usleep(100); //0.1ms
 	}
 
 	gpio_fd_close(gpio_fdbut0);

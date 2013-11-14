@@ -1,7 +1,8 @@
 #include <xdo.h>
 
 int main() {
-  xdo_t *xdo = xdo_new(NULL);
-  xdo_keysequence(xdo, CURRENTWINDOW, "A", 0);
+  system("xdotool key Shift+a");
+  system("xdotool key uparrow");
+  system("xdotool key Shift+a");
   return  0;
 }

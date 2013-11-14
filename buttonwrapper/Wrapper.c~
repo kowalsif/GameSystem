@@ -30,28 +30,23 @@ int main(int argc, char **argv, char **envp)
 	int gpio_fdbut0, gpio_fdbut1, gpio_fdbut2, gpio_fdbut3, gpio_fdbut4, gpio_fdbut5, gpio_fdbut6, gpio_fdbut7, gpio_fdbut8, gpio_fdbut9, timeout, rc;
 	char buf[MAX_BUF];
 	unsigned int gpio;
-	unsigned int but0 = 50; //0->1 p14
-	unsigned int but1 = 60; //1->0 p12
-	unsigned int but2 = 3; //1->0 p3
-	unsigned int but3 = 2; //0->1 p2
-	unsigned int but4 = 30; //1->0 p10
-	unsigned int but5 = 31; //1->0 p12
-	unsigned int but6 = 48; //1->0 p15
-	unsigned int but7 = 49; //0->1 p23
-	unsigned int but8 = 83; //0->1 p27
-	unsigned int but9 = 14; //1->0 p26
+	unsigned int but0 = 50; //0->1 p14 //L
+	unsigned int but1 = 60; //1->0 p12 //R
+	unsigned int but2 = 3; //1->0 p3  //U
+	unsigned int but3 = 2; //0->1 p2 // D use these for directional 
+	unsigned int but4 = 30; //1->0 p10 // A
+	unsigned int but5 = 31; //1->0 p12 // B
+	unsigned int but6 = 48; //1->0 p15 // Start
+	unsigned int but7 = 49; //0->1 p23 //Select
+	unsigned int but8 = 115; //0->1 p27 //End
+	unsigned int but9 = 14; //1->0 p26 //Change game
 	int len;
-	int state[10];
-	state[0] = 0;
-	state[1] = 0;
-	state[2] = 0;
-	state[3] = 0;
-	state[4] = 0;
-	state[5] = 0;
-	state[6] = 0;
-	state[7] = 0;
-	state[8] = 0;
-	state[9] = 0;
+	int state[4];
+	state[0] = 1;
+	state[1] = 1;
+	state[2] = 1;
+	state[3] = 1;
+
 	// Set the signal callback for Ctrl-C
 	signal(SIGINT, signal_handler);
 	
@@ -81,12 +76,12 @@ int main(int argc, char **argv, char **envp)
 	gpio_set_edge(but1, "both");
 	gpio_set_edge(but2, "both");
 	gpio_set_edge(but3, "both");
-	gpio_set_edge(but4, "both");
-	gpio_set_edge(but5, "both");
-	gpio_set_edge(but6, "both");
-	gpio_set_edge(but7, "both");
-	gpio_set_edge(but8, "both");
-	gpio_set_edge(but9, "both");
+	gpio_set_edge(but4, "rising");
+	gpio_set_edge(but5, "rising");
+	gpio_set_edge(but6, "rising");
+	gpio_set_edge(but7, "rising");
+	gpio_set_edge(but8, "rising");
+	gpio_set_edge(but9, "rising");
 	
 	gpio_fdbut0 = gpio_fd_open(but0, O_RDONLY);
 	gpio_fdbut1 = gpio_fd_open(but1, O_RDONLY);
@@ -101,6 +96,7 @@ int main(int argc, char **argv, char **envp)
 	
 
 	timeout = POLL_TIMEOUT;
+	
  
 	while (keepgoing) {
 		memset((void*)fdset, 0, sizeof(fdset));
@@ -143,70 +139,98 @@ int main(int argc, char **argv, char **envp)
 		}
       
 		if (rc == 0) {
-			printf(".");
+			//printf(".");
 		}
         
         if (fdset[0].revents & POLLPRI) {
 			lseek(fdset[0].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[0].fd, buf, MAX_BUF);
-			system("xdotool key z");
+			state[0] = !state[0];
 
 		}    
 		if (fdset[1].revents & POLLPRI) {
 			lseek(fdset[1].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[1].fd, buf, MAX_BUF);
+			state[1] = !state[1];
 
 		}
 		if (fdset[2].revents & POLLPRI) {
 			lseek(fdset[2].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[2].fd, buf, MAX_BUF);
-
+			state[2] = !state[2];
 		}
 		if (fdset[3].revents & POLLPRI) {
 			lseek(fdset[3].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[3].fd, buf, MAX_BUF);
+			//system("xdotool key Down");
+			state[3] = !state[3];
 
 		}
 		if (fdset[4].revents & POLLPRI) {
 			lseek(fdset[4].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[4].fd, buf, MAX_BUF);
+			system("xdotool key Shift_l");
 
 		}
 		if (fdset[5].revents & POLLPRI) {
 			lseek(fdset[5].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[5].fd, buf, MAX_BUF);
-			system("xdotool key z");
+			system("xdotool key Shift_r");
 
 		}    
 		if (fdset[6].revents & POLLPRI) {
 			lseek(fdset[6].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[6].fd, buf, MAX_BUF);
+			system("xdotool key Return");
 
 		}
 		if (fdset[7].revents & POLLPRI) {
 			lseek(fdset[7].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[7].fd, buf, MAX_BUF);
+			system("xdotool key d");
 
 		}
 		if (fdset[8].revents & POLLPRI) {
 			lseek(fdset[8].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[8].fd, buf, MAX_BUF);
+			system("xdotool key e");
 
 		}
 		if (fdset[9].revents & POLLPRI) {
 			lseek(fdset[9].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[9].fd, buf, MAX_BUF);
+			system("xdotool key f");
 
+		}
+		
+		if (state[0] == 1){
+			system("xdotool key Left");
+		}
+		if (state[1] == 1){
+			system("xdotool key Right");
+		}
+		if (state[2] == 1){
+			system("xdotool key Up");
+		}
+		if (state[3] == 1){
+			system("xdotool key Down");
 		}
 
 
 		fflush(stdout);
+		//usleep(1); //0.1ms
 	}
 
 	gpio_fd_close(gpio_fdbut0);
 	gpio_fd_close(gpio_fdbut1);
 	gpio_fd_close(gpio_fdbut2);
 	gpio_fd_close(gpio_fdbut3);
+	gpio_fd_close(gpio_fdbut4);
+	gpio_fd_close(gpio_fdbut5);
+	gpio_fd_close(gpio_fdbut6);
+	gpio_fd_close(gpio_fdbut7);
+	gpio_fd_close(gpio_fdbut8);
+	gpio_fd_close(gpio_fdbut9);
 	
 	return 0;
 }
