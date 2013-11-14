@@ -137,8 +137,27 @@ int main(int argc, char **argv, char **envp)
 	int count = 0;
 	int dir = 0;
 	int s = 0;
+	int reset = 0;
+	char hold[1];
+	int halt = 0;
 	while (keepgoing) {
-	    usleep(100000);
+	
+		if (reset == 1){
+			reset = 0;
+			clear(grid);
+			pt = 0;
+			ph = 1;
+			grid[10][10] = 8;
+			x = 10;
+			y = 10;
+			ox[0] = 10;
+			oy[0] = 10;
+			grid[15][15] = 4;
+			dir = 0;
+			scanf("%s", &hold); //wait for any input
+				
+		}
+	    usleep(300000);
 		s = 0;
 		memset((void*)fdset, 0, sizeof(fdset));
 	
@@ -155,16 +174,22 @@ int main(int argc, char **argv, char **envp)
 		   if (fdset[0].revents & POLLIN) {
 			(void)read(fdset[0].fd, buf, 1);
 			input = (int) buf[0];
-			//printf(" input is: %d\n", input);
+			printf(" input is: %d\n", input);
 			//printf("\npoll() stdin read 0x%2.2X\n", (unsigned int) buf[0]);
 			fflush(stdout);
 		  }
 		  
 		  /*
-		  w = 119, s = 115, d = 100, a = 97;
+		  w = 119, s = 115, d = 100, a = 97, q = 113;
 		  */
 
-
+		   if (input == 113){
+		   		halt = !halt;
+		   		printf("halt button pressed, mode toggling");
+		   }
+		   if (halt == 1){
+		   		continue;
+		   }
 		   if (input == 10){
 		      input = 0; //clear input
 		   	  continue;
@@ -172,13 +197,13 @@ int main(int argc, char **argv, char **envp)
 		   if (input ==  100){
 		      dir = 0;
 		   }
-		   if (input == 119){
+		   else if (input == 119){
 		      dir = 1;
 		   }
-		   if (input == 97){
+		   else if (input == 97){
 		      dir = 2;
 		   }
-		   if (input == 115){
+		   else if (input == 115){
 		      dir = 3;
 		   }
 		   
@@ -189,12 +214,15 @@ int main(int argc, char **argv, char **envp)
 		   	  if (dir == 0){
 		   	     if (y == height-1){
 		         	printf("you lose\n");
-		         	break;
+		         	reset = 1;
+		         	continue;
+		         	//break;
 		         }
 		   	     y++;
 		   	     s = strike(grid, x, y);
 		   	     if (s == 1){
-		   	  	 	break;
+		   	  	 	reset = 1;
+		         	continue;
 		   	  	 }
 		   	  	 else if (s == 2) {
 		   	  	 	mv(grid, rx, ry);
@@ -211,12 +239,14 @@ int main(int argc, char **argv, char **envp)
 		   	  if (dir == 1){
 		   	     if (x == 0){
 		         	printf("you lose\n");
-		         	break;
+		         	reset = 1;
+		         	continue;
 		         }
 		   	     x--;
 		   	     s = strike(grid, x, y);
 		   	     if (s == 1){
-		   	  	 	break;
+		   	  	 	reset = 1;
+		         	continue;
 		   	  	 }
 		   	  	 else if (s == 2) {
 		   	  	 	mv(grid, rx, ry);
@@ -233,12 +263,14 @@ int main(int argc, char **argv, char **envp)
 		   	  if (dir == 2){
 		   	     if (y == 0){
 		         	printf("you lose\n");
-		         	break;
+		         	reset = 1;
+		         	continue;
 		         }
 		   	     y--;
 		   	     s = strike(grid, x, y);
 		   	     if (s == 1){
-		   	  	 	break;
+		   	  	 	reset = 1;
+		         	continue;
 		   	  	 }
 		   	  	 else if (s == 2) {
 		   	  	 	mv(grid, rx, ry);
@@ -255,12 +287,14 @@ int main(int argc, char **argv, char **envp)
 		   	  if (dir == 3 && x < width){
 		   	     if (x == width-1){
 		         	printf("you lose\n");
-		         	break;
+		         	reset = 1;
+		         	continue;
 		         }  
 		   	     x++;
 		   	     s = strike(grid, x, y);
 		   	     if (s == 1){
-		   	  	 	break;
+		   	  	 	reset = 1;
+		         	continue;
 		   	  	 }
 		   	  	 else if (s == 2) {
 		   	  	 	mv(grid, rx, ry);
@@ -313,7 +347,7 @@ int main(int argc, char **argv, char **envp)
 int strike(int **grid, int x, int y);
 int strike(int **grid, int x, int y){
 	if (grid[x][y] == 1){
-		keepgoing = 0;
+		//keepgoing = 0;
 		printf("loss condition\n");
 		return 1;
 	}
@@ -333,5 +367,20 @@ void rm(int **grid, int x, int y){
 	if(grid[x][y] != 4){
 		grid[x][y] = 0;
 	}
+}
+
+void clear(int **grid);
+void clear(int **grid){
+	int i = 0;
+	int j;
+	while (i < 20){
+		j = 0;
+		while (j < 20){
+			grid[i][j] = 0;
+			j++;
+		}
+		i++;
+	}
+
 }
 

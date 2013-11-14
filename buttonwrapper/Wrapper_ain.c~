@@ -10,7 +10,7 @@
 #include <signal.h>	// Defines signal-handling functions (i.e. trap Ctrl-C)
 #include "gpio-utils.h"
 
-#define POLL_TIMEOUT (1 * 50) /* 3 seconds */
+#define POLL_TIMEOUT (1 * 5) /* 3 seconds */
 #define MAX_BUF 64
 
 int keepgoing = 1;	// Set to 0 when ctrl-c is pressed
