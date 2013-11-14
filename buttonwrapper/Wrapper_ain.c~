@@ -175,7 +175,7 @@ int main(int argc, char **argv, char **envp)
         if (fdset[0].revents & POLLPRI) {
 			lseek(fdset[0].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[0].fd, buf, MAX_BUF);
-			system("xdotool key d");
+			system("xdotool key a");
 			system("xdotool key Return");
 			//state[0] = !state[0];
 
@@ -183,7 +183,7 @@ int main(int argc, char **argv, char **envp)
 		if (fdset[1].revents & POLLPRI) {
 			lseek(fdset[1].fd, 0, SEEK_SET);// Read from the start of the file
 			len = read(fdset[1].fd, buf, MAX_BUF);
-			system("xdotool key a");
+			system("xdotool key d");
 			system("xdotool key Return");
 			//state[1] = !state[1];
 
