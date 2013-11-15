@@ -4,7 +4,7 @@ TOOLS_CFLAGS        := -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual 
 
 all: Wrapper
 
-Wrapper: wrapper.o Wrapper_ain.c gpio-utils.c gpio-utils.h
+Wrapper:  Wrapper_ain.c gpio-utils.c gpio-utils.h
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
